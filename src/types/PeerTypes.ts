@@ -5,7 +5,7 @@ type MetaFileData = {
     size: number,
 }
 interface InitinalData {
-    mode: "metaData" | "dataTransfer" | "status" | "complete"
+    mode: "metaData" | "dataTransfer" | "status" | "complete" | "id" | "cancel"
     list?: MetaFileData[],
     meta?: MetaFileData,
     currentByte?: number,

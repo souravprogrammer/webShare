@@ -20,24 +20,21 @@ export default function Receive({ peer }: Props) {
   const params = useParams();
   const [reciverPeer, setReciverPeer] = useState<DataConnection | null>(null);
   const [sharedList, setSharedList] = useState<any[]>([]);
-  const file = useRef<Array<any>>([]);
+  const file = useRef<any>({});
   const [progress, setProgress] = useState<number>(0);
-
-  // useEffect(() => {
-  //   console.log("progress ", progress);
-  // }, [progress]);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
     // sender peer ID is here
-    console.log(params.id);
+    // console.log(params.id);
     const conn = peer?.connect(params.id ?? "");
     conn?.on("open", function () {
       // Receive messages
-      console.log("reciver open");
+      // console.log("reciver open");
       setReciverPeer(conn);
       conn.on("data", (d: any) => {
         const data: InitinalData = d;
-        console.log("reciver Received", data);
+        // console.log("reciver Received", data);
         if (data.mode === "metaData") {
           if (data.list) {
             const dd = data.list ?? [];
@@ -46,20 +43,25 @@ export default function Receive({ peer }: Props) {
         } else if (data.mode === "dataTransfer") {
           // do something here too
 
-          file.current.push(data.data);
-          console.count("data ");
+          if (!file.current[data.meta?.name ?? "noname"]) {
+            file.current[data.meta?.name ?? "noname"] = [];
+          }
+          file.current[data.meta?.name ?? "noname"].push(data.data);
+          // console.count("data ");
 
           const percent = (data.currentByte ?? 0) / (data.meta?.size ?? 1);
           // data?.currentByte ?? 0 / (data?.meta?.size ?? 1)) * 100
           setProgress(() => percent * 100);
         } else if (data.mode === "complete") {
           setProgress(0);
-          const ff = new Blob(file.current);
-          ff.arrayBuffer().then((aa) => {
-            console.log("file ", aa.byteLength, data.meta?.size);
-          });
+          setIsDownloading(false);
 
-          file.current = [];
+          const ff = new Blob(file.current[data.meta?.name ?? "noname"]);
+          // ff.arrayBuffer().then((aa) => {
+          //   // console.log("file ", aa.byteLength, data.meta?.size);
+          // });
+
+          file.current[data.meta?.name ?? "noname"] = [];
 
           const url = window.URL.createObjectURL(ff);
           const link = document.createElement("a");
@@ -74,15 +76,11 @@ export default function Receive({ peer }: Props) {
 
           // Clean up and remove the link
           link?.parentNode?.removeChild(link);
-          console.log("file.current", file.current);
+          // console.log("file.current", file.current);
         }
       });
     });
   }, [peer]);
-
-  useEffect(() => {
-    console.log(">. ", sharedList);
-  }, [sharedList]);
 
   const tableHeading: TableHeading[] = [
     {
@@ -100,7 +98,7 @@ export default function Receive({ peer }: Props) {
   ];
 
   const tableData: TableRow[][] = sharedList?.map((f) => {
-    console.log("got");
+    // console.log("got");
     return [
       { name: f.name, align: "left" },
       { name: f.size / 1024, align: "left" },
@@ -109,8 +107,20 @@ export default function Receive({ peer }: Props) {
         Action: () => {
           return (
             <div>
+              {/* {isDownloading && (
+                <IconButton
+                  onClick={async () => {
+                    setIsDownloading(false);
+                    await handleCancel(f);
+                  }}
+                >
+                  <CancelIcon />
+                </IconButton>
+              )} */}
               <IconButton
+                disabled={isDownloading}
                 onClick={async () => {
+                  setIsDownloading(true);
                   await handleDownlaod(f);
                 }}
               >
@@ -161,7 +171,7 @@ export default function Receive({ peer }: Props) {
               py: 4,
             }}
           >
-            {progress ? (
+            {isDownloading ? (
               <LinearProgress variant="determinate" value={progress} />
             ) : null}
           </Box>

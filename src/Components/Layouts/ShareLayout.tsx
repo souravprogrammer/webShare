@@ -1,12 +1,18 @@
 import { Route, Routes } from "react-router";
 
-import Send from "../send/Send";
-import Receive from "../rec/Receive";
+import { Suspense, lazy } from "react";
+
 import Peer, { DataConnection } from "peerjs";
 import { useEffect, useState } from "react";
 import { InitinalData, MetaFileData } from "../../types/PeerTypes";
+import CircularProgress from "@mui/material/CircularProgress";
 
 type Props = {};
+// import Send from "../send/Send";
+// import Receive from "../rec/Receive";
+
+const Send = lazy(() => import("../send/Send"));
+const Receive = lazy(() => import("../rec/Receive"));
 
 export default function ShareLayout({}: Props) {
   const [peer, setPeer] = useState<Peer | undefined>();
@@ -16,52 +22,15 @@ export default function ShareLayout({}: Props) {
     null
   );
 
-  // useEffect(() => {
-  //   async function chunck(
-  //     file: File,
-  //     CHUNCK_SIZE: number,
-  //     meta?: MetaFileData
-  //   ) {
-  //     const buffer = await file.arrayBuffer();
-
-  //     console.log("send  ", {
-  //       chunck_numebr: buffer.byteLength / CHUNCK_SIZE,
-  //       size: buffer.byteLength,
-  //     });
-
-  //     const c = [];
-  //     for (let count = 0; count < buffer.byteLength; count += CHUNCK_SIZE) {
-  //       // const start = i * chunkSize;
-  //       // const end = (i + 1) * chunkSize;
-  //       const chunck = buffer.slice(
-  //         count,
-  //         Math.min(count + CHUNCK_SIZE, buffer.byteLength)
-  //       );
-
-  //       console.count("send ");
-
-  //       c.push(chunck);
-
-  //       console.log("send size ", buffer.byteLength, count + CHUNCK_SIZE);
-  //     }
-  //     const b = new Blob(c);
-  //     const rec = await b.arrayBuffer();
-  //     console.log("send ", rec.byteLength, buffer.byteLength);
-  //   }
-
-  //   for (let file of fileList) {
-  //     chunck(file, 16 * 1024);
-  //   }
-  // }, [fileList]);
-
   useEffect(() => {
     const per = new Peer();
-    per.on("open", (id) => {
+    per.on("open", () => {
       setPeer(per);
-      console.log("connection opened", id);
+      // console.log("connection opened", id);
     });
+
     per?.on("connection", (con) => {
-      console.log("reciver connected ");
+      // console.log("reciver connected ");
 
       // con.send({
       //   firstConnection: true,
@@ -72,12 +41,13 @@ export default function ShareLayout({}: Props) {
       //   })),
       // });
       con.on("open", () => {
-        const list = fileList.map((f) => {
-          return {
-            name: f.name,
-          };
-        });
-        console.log("list", list);
+        // const list = fileList.map((f) => {
+        //   return {
+        //     name: f.name,
+        //   };
+        // });
+
+        // console.log("list", list);
 
         setReciver(con);
         // con.send({
@@ -88,8 +58,13 @@ export default function ShareLayout({}: Props) {
         //   })),
         // });
         con.on("data", (recivedData) => {
-          console.log("recivedData : ", recivedData);
-          if (!fileTransfering) {
+          // console.log("recivedData : ", recivedData);
+          const resdata: InitinalData = recivedData as InitinalData;
+
+          if (resdata.mode === "cancel") {
+            // console.log("setting cancel ");
+            setFileTransfering(null);
+          } else if (!fileTransfering) {
             setFileTransfering(recivedData as MetaFileData);
           }
         });
@@ -104,10 +79,10 @@ export default function ShareLayout({}: Props) {
   ) {
     const buffer = await file.arrayBuffer();
 
-    console.log("send  ", {
-      chunck_numebr: buffer.byteLength / CHUNCK_SIZE,
-      size: buffer.byteLength,
-    });
+    // console.log("send  ", {
+    //   chunck_numebr: buffer.byteLength / CHUNCK_SIZE,
+    //   size: buffer.byteLength,
+    // });
 
     for (let count = 0; count < buffer.byteLength; count += CHUNCK_SIZE) {
       // const start = i * chunkSize;
@@ -123,8 +98,8 @@ export default function ShareLayout({}: Props) {
         meta: meta,
         currentByte: count + CHUNCK_SIZE,
       };
-      console.count("send ");
-      console.log("send size ", buffer.byteLength, count + CHUNCK_SIZE);
+      // console.count("send ");
+      // console.log("send size ", buffer.byteLength, count + CHUNCK_SIZE);
       await reciver?.send(data);
     }
     await reciver?.send({
@@ -154,26 +129,45 @@ export default function ShareLayout({}: Props) {
   }, [fileList, reciver]);
   return (
     <div style={{ paddingTop: "64px" }}>
-      <Routes>
-        <Route
-          path="/share"
-          element={<Send peer={peer} files={fileList} setFiles={setFileList} />}
-        />
-        <Route path="/recive/:id" element={<Receive peer={peer} />} />
-        <Route
-          path="*"
-          element={
-            <div
-              style={{
-                height: "100vh",
-                border: "1px solid red",
-              }}
-            >
-              Not found
-            </div>
-          }
-        />
-      </Routes>
+      <Suspense
+        fallback={
+          <div
+            style={{
+              width: "100vw",
+              height: "calc(100vh - 64px)",
+
+              display: "grid",
+              placeItems: "center",
+            }}
+          >
+            {" "}
+            <CircularProgress />
+          </div>
+        }
+      >
+        <Routes>
+          <Route
+            path="/share"
+            element={
+              <Send peer={peer} files={fileList} setFiles={setFileList} />
+            }
+          />
+          <Route path="/recive/:id" element={<Receive peer={peer} />} />
+          <Route
+            path="*"
+            element={
+              <div
+                style={{
+                  height: "100vh",
+                  border: "1px solid red",
+                }}
+              >
+                Not found
+              </div>
+            }
+          />
+        </Routes>
+      </Suspense>
     </div>
   );
 }

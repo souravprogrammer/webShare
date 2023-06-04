@@ -9,8 +9,6 @@ import MyUpload from "../../utils/MyUpload";
 import { TableHeading, TableRow } from "../../types/TableTypes";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { TextField, Button } from "@mui/material";
-import { useLocation } from "react-router";
-import { useEffect } from "react";
 
 type Props = {
   peer?: Peer;
@@ -23,16 +21,13 @@ export default function Send({ peer, files, setFiles }: Props) {
     const file = [];
     for (let i = 0; i < f.length; i++) {
       file.push(f[i]);
-      console.log(f[i]);
+      // console.log(f[i]);
     }
     setFiles?.(file);
   };
 
-  const l = useLocation();
 
-  useEffect(() => {
-    console.log(l);
-  }, []);
+
 
   const TableHeading: TableHeading[] = [
     {

@@ -13,6 +13,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
+import { useNavigate } from "react-router";
 
 interface Props {
   /**
@@ -28,6 +29,7 @@ const navItems = ["share", "Contact"];
 export default function DrawerAppBar(props: Props) {
   const { window } = props;
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const navigate = useNavigate();
 
   const handleDrawerToggle = () => {
     setMobileOpen((prevState) => !prevState);
@@ -41,7 +43,15 @@ export default function DrawerAppBar(props: Props) {
       <Divider />
       <List>
         {navItems.map((item) => (
-          <ListItem key={item} disablePadding>
+          <ListItem
+            key={item}
+            disablePadding
+            onClick={() => {
+              if (item === "share") {
+                navigate("/share");
+              }
+            }}
+          >
             <ListItemButton sx={{ textAlign: "center" }}>
               <ListItemText primary={item} />
             </ListItemButton>
@@ -76,13 +86,22 @@ export default function DrawerAppBar(props: Props) {
           <Typography
             variant="h6"
             component="div"
+            onClick={() => navigate("/")}
             sx={{ flexGrow: 1, display: { xs: "none", sm: "block" } }}
           >
             Web Share
           </Typography>
           <Box sx={{ display: { xs: "none", sm: "block" } }}>
             {navItems.map((item) => (
-              <Button key={item} sx={{ color: "#fff" }}>
+              <Button
+                key={item}
+                sx={{ color: "#fff" }}
+                onClick={() => {
+                  if (item === "share") {
+                    navigate("/share");
+                  }
+                }}
+              >
                 {item}
               </Button>
             ))}
