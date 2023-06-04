@@ -1,4 +1,3 @@
-import React from "react";
 import "./table.css";
 
 import { TableHeading, TableRow } from "../types/TableTypes";

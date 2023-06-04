@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router";
 
 import Send from "../send/Send";
 import Receive from "../rec/Receive";
-import Peer, { ConnectionType, DataConnection } from "peerjs";
+import Peer, { DataConnection } from "peerjs";
 import { useEffect, useState } from "react";
 import { InitinalData, MetaFileData } from "../../types/PeerTypes";
 

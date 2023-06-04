@@ -1,13 +1,13 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef } from "react";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import {
   Grid,
   Typography,
-  TextField,
+  // TextField,
   Icon,
-  Avatar,
-  Box,
-  IconButton,
+  // Avatar,
+  // Box,
+  // IconButton,
 } from "@mui/material";
 // import CircularProgress from "@mui/material/CircularProgress";
 // import CloseOutlinedIcon from "@mui/icons-material/CloseOutlined";
@@ -29,13 +29,13 @@ function MyUpload({ onChange }: Props) {
   //   const handelUploadField = (e: React.MouseEvent) => {
   //     fileRef.current.children[0].children[0].click();
   //   };
-  const handleDragEnter_Start = (e: React.MouseEvent) => {
+  const handleDragEnter_Start = () => {
     uploadAreaRef.current.style.opacity = "0.3";
   };
-  const handleLeave = (e: React.MouseEvent) => {
+  const handleLeave = () => {
     uploadAreaRef.current.style.opacity = "1";
   };
-  const handleDrop = (e: React.MouseEvent) => {
+  const handleDrop = () => {
     uploadAreaRef.current.style.opacity = "1";
   };
 

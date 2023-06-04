@@ -23,11 +23,9 @@ export default function Receive({ peer }: Props) {
   const file = useRef<Array<any>>([]);
   const [progress, setProgress] = useState<number>(0);
 
-  async function measureProgress() {}
-
-  useEffect(() => {
-    console.log("progress ", progress);
-  }, [progress]);
+  // useEffect(() => {
+  //   console.log("progress ", progress);
+  // }, [progress]);
 
   useEffect(() => {
     // sender peer ID is here
@@ -43,7 +41,7 @@ export default function Receive({ peer }: Props) {
         if (data.mode === "metaData") {
           if (data.list) {
             const dd = data.list ?? [];
-            setSharedList((d) => [...dd]);
+            setSharedList(() => [...dd]);
           }
         } else if (data.mode === "dataTransfer") {
           // do something here too
@@ -51,11 +49,11 @@ export default function Receive({ peer }: Props) {
           file.current.push(data.data);
           console.count("data ");
 
-          // const percent = (data.currentByte ?? 0) / (data.meta?.size ?? 1);
-          // // data?.currentByte ?? 0 / (data?.meta?.size ?? 1)) * 100
-          // setProgress(() => percent * 100);
+          const percent = (data.currentByte ?? 0) / (data.meta?.size ?? 1);
+          // data?.currentByte ?? 0 / (data?.meta?.size ?? 1)) * 100
+          setProgress(() => percent * 100);
         } else if (data.mode === "complete") {
-          // setProgress(0);
+          setProgress(0);
           const ff = new Blob(file.current);
           ff.arrayBuffer().then((aa) => {
             console.log("file ", aa.byteLength, data.meta?.size);
@@ -101,7 +99,7 @@ export default function Receive({ peer }: Props) {
     },
   ];
 
-  const tableData: TableRow[][] = sharedList?.map((f, i) => {
+  const tableData: TableRow[][] = sharedList?.map((f) => {
     console.log("got");
     return [
       { name: f.name, align: "left" },
@@ -109,13 +107,10 @@ export default function Receive({ peer }: Props) {
       {
         align: "right",
         Action: () => {
-          const [disable, setDisable] = useState(false);
           return (
             <div>
               <IconButton
-                disabled={disable}
                 onClick={async () => {
-                  // setDisable(true);
                   await handleDownlaod(f);
                 }}
               >

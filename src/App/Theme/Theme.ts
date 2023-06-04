@@ -2,7 +2,7 @@
 
 
 
-export const getDesignTheme = (mode: string): object => {
+export const getDesignTheme = (): object => {
   return {
     palette: {
       button: {

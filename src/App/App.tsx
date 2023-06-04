@@ -16,7 +16,7 @@ import ShareLayout from "../Components/Layouts/ShareLayout";
 
 function App() {
   const theme = useMemo(
-    () => responsiveFontSizes(createTheme(getDesignTheme("light"))),
+    () => responsiveFontSizes(createTheme(getDesignTheme())),
     []
   );
   return (

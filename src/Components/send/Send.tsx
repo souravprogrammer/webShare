@@ -48,7 +48,7 @@ export default function Send({ peer, files, setFiles }: Props) {
       align: "right",
     },
   ];
-  const tableData: TableRow[][] = files?.map((f, i) => {
+  const tableData: TableRow[][] = files?.map((f) => {
     console.log("got");
     return [
       { name: f.name, align: "left" },
