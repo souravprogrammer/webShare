@@ -9,6 +9,8 @@ import MyUpload from "../../utils/MyUpload";
 import { TableHeading, TableRow } from "../../types/TableTypes";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { TextField, Button } from "@mui/material";
+import { useLocation } from "react-router";
+import { useEffect } from "react";
 
 type Props = {
   peer?: Peer;
@@ -25,6 +27,12 @@ export default function Send({ peer, files, setFiles }: Props) {
     }
     setFiles?.(file);
   };
+
+  const l = useLocation();
+
+  useEffect(() => {
+    console.log(l);
+  }, []);
 
   const TableHeading: TableHeading[] = [
     {
@@ -87,7 +95,7 @@ export default function Send({ peer, files, setFiles }: Props) {
             hiddenLabel
             variant="filled"
             size="small"
-            value={`http://localhost:5173/recive/${peer?.id}`}
+            value={`${window.location.protocol}//${window.location.host}/recive/${peer?.id}`}
             sx={{
               mx: 2,
             }}
@@ -121,6 +129,14 @@ export default function Send({ peer, files, setFiles }: Props) {
             }}
           >
             {"Your Files"}
+          </Typography>
+          <Typography
+            sx={{
+              py: 2,
+            }}
+          >
+            {`(Closing this page means you stop sharing!
+Simply keep this page open in the background to keep sharing.)`}
           </Typography>
 
           <MyTable data={tableData} headings={TableHeading} />
