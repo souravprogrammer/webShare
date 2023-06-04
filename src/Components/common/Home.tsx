@@ -9,6 +9,7 @@ import AllInclusiveIcon from "@mui/icons-material/AllInclusive";
 import ElectricBoltIcon from "@mui/icons-material/ElectricBolt";
 import HubIcon from "@mui/icons-material/Hub";
 import EnhancedEncryptionIcon from "@mui/icons-material/EnhancedEncryption";
+import { useNavigate } from "react-router";
 
 type Props = {
   Icon?: any;
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export default function Home({}: Props) {
+  const navigate = useNavigate();
   return (
     <Paper
       sx={{
@@ -59,6 +61,9 @@ export default function Home({}: Props) {
             variant="contained"
             color={"button" as "primary"}
             sx={{ width: "200px" }}
+            onClick={() => {
+              navigate("/share");
+            }}
           >
             Start Sharing
           </Button>
