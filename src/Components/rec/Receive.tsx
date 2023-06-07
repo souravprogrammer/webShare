@@ -1,6 +1,6 @@
 import Peer, { DataConnection } from "peerjs";
 import { useParams } from "react-router";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import { InitinalData, MetaFileData } from "../../types/PeerTypes";
 import MyTable from "../../utils/MyTable";
 import { TableHeading, TableRow } from "../../types/TableTypes";
@@ -22,11 +22,9 @@ export default function Receive({ peer }: Props) {
   const params = useParams();
   const [reciverPeer, setReciverPeer] = useState<DataConnection | null>(null);
   const [sharedList, setSharedList] = useState<any[]>([]);
-  const file = useRef<any>({});
+  // const file = useRef<any>({});
   const [progress, setProgress] = useState<number>(0);
   const [isDownloading, setIsDownloading] = useState(false);
-
-  const [isPending, startTransition] = useTransition();
 
   const worker = useRef(new Worker("/Reciver.js"));
   // const [worker] = useState<Worker>(new Worker("/Reciver.js"));
