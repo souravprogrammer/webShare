@@ -30,39 +30,12 @@ export default function ShareLayout({}: Props) {
     });
 
     per?.on("connection", (con) => {
-      // console.log("reciver connected ");
-
-      // con.send({
-      //   firstConnection: true,
-      //   list: fileList.map((f) => ({
-      //     name: f.name,
-      //     type: f.type,
-      //     size: f.size,
-      //   })),
-      // });
       con.on("open", () => {
-        // const list = fileList.map((f) => {
-        //   return {
-        //     name: f.name,
-        //   };
-        // });
-
-        // console.log("list", list);
-
         setReciver(con);
-        // con.send({
-        //   list: fileList.map((f) => ({
-        //     name: f.name,
-        //     size: f.size,
-        //     type: f.type,
-        //   })),
-        // });
-        con.on("data", (recivedData) => {
-          // console.log("recivedData : ", recivedData);
-          const resdata: InitinalData = recivedData as InitinalData;
 
+        con.on("data", (recivedData) => {
+          const resdata: InitinalData = recivedData as InitinalData;
           if (resdata.mode === "cancel") {
-            // console.log("setting cancel ");
             setFileTransfering(null);
           } else if (!fileTransfering) {
             setFileTransfering(recivedData as MetaFileData);
@@ -78,15 +51,7 @@ export default function ShareLayout({}: Props) {
     meta: MetaFileData
   ) {
     const buffer = await file.arrayBuffer();
-
-    // console.log("send  ", {
-    //   chunck_numebr: buffer.byteLength / CHUNCK_SIZE,
-    //   size: buffer.byteLength,
-    // });
-
     for (let count = 0; count < buffer.byteLength; count += CHUNCK_SIZE) {
-      // const start = i * chunkSize;
-      // const end = (i + 1) * chunkSize;
       const chunck = buffer.slice(
         count,
         Math.min(count + CHUNCK_SIZE, buffer.byteLength)
@@ -98,8 +63,7 @@ export default function ShareLayout({}: Props) {
         meta: meta,
         currentByte: count + CHUNCK_SIZE,
       };
-      // console.count("send ");
-      // console.log("send size ", buffer.byteLength, count + CHUNCK_SIZE);
+
       await reciver?.send(data);
     }
     await reciver?.send({

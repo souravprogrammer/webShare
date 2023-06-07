@@ -1,6 +1,6 @@
 import Peer, { DataConnection } from "peerjs";
 import { useParams } from "react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { InitinalData, MetaFileData } from "../../types/PeerTypes";
 import MyTable from "../../utils/MyTable";
 import { TableHeading, TableRow } from "../../types/TableTypes";
@@ -16,6 +16,8 @@ type Props = {
   peer?: Peer;
 };
 
+// const worker = new Worker("Reciver.js");
+
 export default function Receive({ peer }: Props) {
   const params = useParams();
   const [reciverPeer, setReciverPeer] = useState<DataConnection | null>(null);
@@ -23,6 +25,31 @@ export default function Receive({ peer }: Props) {
   const file = useRef<any>({});
   const [progress, setProgress] = useState<number>(0);
   const [isDownloading, setIsDownloading] = useState(false);
+
+  const [isPending, startTransition] = useTransition();
+
+  const worker = useRef(new Worker("/Reciver.js"));
+  // const [worker] = useState<Worker>(new Worker("/Reciver.js"));
+
+  // const [worker] = useState();
+
+  useEffect(() => {
+    // const worker = new Worker("/Reciver.js");
+    console.log("effect");
+    if (window.Worker) {
+      if (!worker.current.onmessage) {
+        worker.current.onmessage = (e: MessageEvent<any>) => {
+          console.log(e.data);
+          if (e.data?.percent) {
+            setProgress(e.data.percent);
+          } else {
+            downlaod(e.data);
+            setIsDownloading(false);
+          }
+        };
+      }
+    }
+  }, []);
 
   useEffect(() => {
     // sender peer ID is here
@@ -35,49 +62,62 @@ export default function Receive({ peer }: Props) {
       conn.on("data", (d: any) => {
         const data: InitinalData = d;
         // console.log("reciver Received", data);
+
         if (data.mode === "metaData") {
           if (data.list) {
             const dd = data.list ?? [];
             setSharedList(() => [...dd]);
           }
-        } else if (data.mode === "dataTransfer") {
-          // do something here too
-
-          if (!file.current[data.meta?.name ?? "noname"]) {
-            file.current[data.meta?.name ?? "noname"] = [];
-          }
-          file.current[data.meta?.name ?? "noname"].push(data.data);
-          // console.count("data ");
-
-          const percent = (data.currentByte ?? 0) / (data.meta?.size ?? 1);
-          // data?.currentByte ?? 0 / (data?.meta?.size ?? 1)) * 100
-          setProgress(() => percent * 100);
-        } else if (data.mode === "complete") {
-          setProgress(0);
-          setIsDownloading(false);
-
-          const ff = new Blob(file.current[data.meta?.name ?? "noname"]);
-          // ff.arrayBuffer().then((aa) => {
-          //   // console.log("file ", aa.byteLength, data.meta?.size);
-          // });
-
-          file.current[data.meta?.name ?? "noname"] = [];
-
-          const url = window.URL.createObjectURL(ff);
-          const link = document.createElement("a");
-          link.href = url;
-          link.setAttribute("download", data?.meta?.name ?? "noname.txt");
-
-          // Append to html link element page
-          document.body.appendChild(link);
-
-          // Start download
-          link.click();
-
-          // Clean up and remove the link
-          link?.parentNode?.removeChild(link);
-          // console.log("file.current", file.current);
+        } else {
+          // if (data.mode === "dataTransfer") {
+          //   startTransition(() => {
+          //     const percent = (data.currentByte ?? 0) / (data.meta?.size ?? 1);
+          //     setProgress(() => percent * 100);
+          //   });
+          // } else if (data.mode === "complete") {
+          //   setProgress(0);
+          //   setIsDownloading(false);
+          // }
+          worker.current.postMessage(data);
         }
+        // } else if (data.mode === "dataTransfer") {
+        //   // do something here too
+
+        //   if (!file.current[data.meta?.name ?? "noname"]) {
+        //     file.current[data.meta?.name ?? "noname"] = [];
+        //   }
+        //   worker.postMessage(data.data);
+        //   // file.current[data.meta?.name ?? "noname"].push(data.data);
+
+        //   const percent = (data.currentByte ?? 0) / (data.meta?.size ?? 1);
+
+        //   setProgress(() => percent * 100);
+        // } else if (data.mode === "complete") {
+        //   setProgress(0);
+        //   setIsDownloading(false);
+
+        //   const ff = new Blob(file.current[data.meta?.name ?? "noname"]);
+        //   // ff.arrayBuffer().then((aa) => {
+        //   //   // console.log("file ", aa.byteLength, data.meta?.size);
+        //   // });
+
+        //   file.current[data.meta?.name ?? "noname"] = [];
+
+        //   const url = window.URL.createObjectURL(ff);
+        //   const link = document.createElement("a");
+        //   link.href = url;
+        //   link.setAttribute("download", data?.meta?.name ?? "noname.txt");
+
+        //   // Append to html link element page
+        //   document.body.appendChild(link);
+
+        //   // Start download
+        //   link.click();
+
+        //   // Clean up and remove the link
+        //   link?.parentNode?.removeChild(link);
+        //   // console.log("file.current", file.current);
+        // }
       });
     });
   }, [peer]);
@@ -190,4 +230,18 @@ export default function Receive({ peer }: Props) {
       </Box>
     </div>
   );
+}
+
+function downlaod(data: { data: Blob; meta: MetaFileData }): void {
+  const url = window.URL.createObjectURL(data.data);
+
+  const link = document.createElement("a");
+  link.href = url;
+
+  link.setAttribute("download", data?.meta?.name ?? "noname.txt");
+
+  document.body.appendChild(link);
+  link.click();
+
+  link?.parentNode?.removeChild(link);
 }

@@ -26,9 +26,6 @@ export default function Send({ peer, files, setFiles }: Props) {
     setFiles?.(file);
   };
 
-
-
-
   const TableHeading: TableHeading[] = [
     {
       name: "Name",

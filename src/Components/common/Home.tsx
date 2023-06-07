@@ -18,6 +18,7 @@ type Props = {
 
 export default function Home({}: Props) {
   const navigate = useNavigate();
+
   return (
     <Paper
       sx={{
