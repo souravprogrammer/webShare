@@ -4,6 +4,7 @@ let percent = 0;
 
 self.onmessage = (e) => {
   const data = e.data;
+  console.log("data");
 
   if (data.mode === "dataTransfer") {
     if (!file[data.meta?.name ?? "noname"]) {
